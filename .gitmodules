@@ -1,0 +1,6 @@
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/m-germano/frontend-pweb-crud
+[submodule "backend"]
+	path = backend
+	url = https://github.com/m-germano/backend-pweb-crud
