@@ -52,7 +52,7 @@ git submodule update --init --recursive
 
 ### 2) Variáveis de ambiente (opcional)
 
-Para OpenWeatherMap, crie `.env` **na raiz do backend**:
+Para OpenWeatherMap, crie `.env` **na raiz do projeto** - sim, no mesmo lugar que o docker-compose.yml:
 
 ```
 OPENWEATHER_API_KEY=coloque_sua_api_key_aqui
@@ -63,7 +63,7 @@ OPENWEATHER_API_KEY=coloque_sua_api_key_aqui
 ⚠️ **Cuidado**: `--remove-orphans` remove containers não gerenciados pelo compose.
 
 ```bash
-docker compose down --volumes --remove-orphans  # limpa containers e volumes antigos
+docker compose down --volumes --remove-orphans  # limpa containers e volumes antigos (opcional)
 docker compose build --no-cache                 # build do zero
 docker compose up -d                             # sobe em background
 ```
