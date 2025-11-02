@@ -1,136 +1,94 @@
-# GeoInfo — CRUD de Continentes, Países e Cidades (com APIs externas)
+# GeoInfo — CRUD de Continentes, Países e Cidades
 
-**GeoInfo** é uma aplicação web completa (frontend + backend + banco) para **cadastrar, consultar, editar e excluir** informações de **continentes, países e cidades**.  
-Cada **cidade** pertence a um **país** e cada **país** pertence a um **continente**.  
-Além do CRUD, a aplicação **consome APIs externas** para complementar os dados e enriquecer a interface:
+**GeoInfo** é uma aplicação web completa (frontend + backend + banco) para **cadastrar, consultar, editar e excluir** informações de continentes, países e cidades, com dados complementares de APIs externas:
 
-- **REST Countries**: idioma, moeda, população estimada, área, fuso horário, bandeira etc.  
-- **OpenWeatherMap**: clima atual por latitude/longitude da cidade.  
-- (UI) **Leaflet/OpenStreetMap** e **FlagCDN/REST Countries** para mapa e bandeiras.
+- **REST Countries**: idioma, moeda, população, área, fuso horário, bandeira.  
+- **OpenWeatherMap**: clima atual por latitude/longitude.  
+- **Leaflet/OpenStreetMap**: mapas interativos; bandeiras via REST Countries/FlagCDN.
 
-Tudo roda com **Docker Compose**: **PostgreSQL + Backend (Express/Prisma) + Frontend (React/Vite/Nginx)**.
+Tudo roda com **Docker Compose**: PostgreSQL + Backend (Express/Prisma) + Frontend (React/Vite/Nginx).
 
 ---
 
-## 📁 Estrutura do repositório
-
-Este repositório usa **submódulos Git**:
+## Estrutura
 
 ```
 crud-ts-pweb/
-├── backend/   # submódulo: https://github.com/m-germano/backend-pweb-crud
-├── frontend/  # submódulo: https://github.com/m-germano/frontend-pweb-crud
+├── backend/   # submódulo Git
+├── frontend/  # submódulo Git
 ├── docker-compose.yml
 └── README.md
 ```
 
-> O frontend publica em **http://localhost:8080**.  
-> O backend publica em **http://localhost:3333** (API em `/api`).  
-> O banco PostgreSQL expõe **5432**.
+- Frontend: `http://localhost:8080`  
+- Backend: `http://localhost:3333` (API em `/api`)  
+- PostgreSQL: porta `5432`
 
 ---
 
-## ✅ Requisitos
+## Requisitos
 
-- **Git** (para clonar com submodules)
-- **Docker** e **Docker Compose** (Docker Desktop no Windows/Mac; `docker compose` no Linux)
+- Git  
+- Docker + Docker Compose  
 
-> Não é necessário Node/npm para rodar em Docker (apenas para desenvolvimento local opcional).
+> Node/npm não é necessário em Docker; apenas para desenvolvimento local.
 
 ---
 
-## 🚀 Como rodar (limpo, do zero)
+## Rodando do zero
 
-> Os comandos abaixo funcionam no **Linux/macOS (bash)** e **Windows PowerShell** (ajuste `\` vs `/` se necessário).
-
-### 1) Clone com submódulos
+### 1) Clonar repositório
 
 ```bash
 git clone --recurse-submodules https://github.com/m-germano/crud-ts-pweb.git
 cd crud-ts-pweb
 ```
 
-Se você já clonou **sem** submodules, inicialize-os:
+Se já clonou sem submodules:
 
 ```bash
 git submodule update --init --recursive
 ```
 
-> Para atualizar os submódulos para as últimas versões dos repos de front/back:
->
-> ```bash
-> git submodule update --remote --merge
-> git add frontend backend
-> git commit -m "Atualiza submódulos frontend e backend"
-> ```
+### 2) Variáveis de ambiente (opcional)
 
-### 2) (Opcional) Configurar variáveis de ambiente
-
-O `docker-compose.yml` já define credenciais do Postgres e **injeta** `DATABASE_URL` para o backend. 
-
-Se quiser **clima via OpenWeatherMap**, crie um arquivo `.env` **na raiz do backend** (mesmo nível do `docker-compose.yml`) com:
+Para OpenWeatherMap, crie `.env` **na raiz do backend**:
 
 ```
 OPENWEATHER_API_KEY=coloque_sua_api_key_aqui
 ```
 
-> Não é necessário definir `VITE_API_BASE_URL` no frontend em Docker — o Nginx do container faz proxy de **/api** para o backend.
+### 3) Subir containers
 
-### 3) Subir tudo do zero (build sem cache)
-
-> Primeiro, garanta que não há nada antigo rodando:
+⚠️ **Cuidado**: `--remove-orphans` remove containers não gerenciados pelo compose.
 
 ```bash
-docker compose down --volumes --remove-orphans
+docker compose down --volumes --remove-orphans  # limpa containers e volumes antigos
+docker compose build --no-cache                 # build do zero
+docker compose up -d                             # sobe em background
 ```
-
-> Agora, **build do zero** e subir:
-
-```bash
-docker compose build --no-cache
-docker compose up -d
-```
-
-Aguarde o banco ficar **healthy**, o backend aplicar **migrations** e executar o **seed** (idempotente), e o frontend publicar a SPA.
 
 ### 4) Verificar
 
-- Frontend: **http://localhost:8080**
-- API (direto): **http://localhost:3333/api/continents**
-- Health: **http://localhost:3333/health**
-- Swagger: **http://localhost:3333/docs**
+- Frontend: `http://localhost:8080`  
+- API: `http://localhost:3333/api/continents`  
+- Health: `http://localhost:3333/health`  
+- Swagger: `http://localhost:3333/docs`
 
 ---
 
-## 🧭 Fluxo funcional (resumo)
+## Comandos úteis
 
-- **CRUD**:
-  - Continentes ↔ Países ↔ Cidades (relacionamentos garantidos via Prisma).
-- **Integrações**:
-  - **REST Countries**: auto-preenche dados do país (idioma, moeda, fuso, população, área, ISO/bandeira).
-  - **OpenWeatherMap**: mostra **clima** da cidade (via lat/lon).
-  - **Leaflet / OpenStreetMap**: **mapas** interativos na UI.
-  - **Flags**: exibição de bandeiras (via REST Countries/FlagCDN).
-- **Interface**:
-  - React + TypeScript, React Router, Tailwind + shadcn (estilo básico).
-  - Sidebar com navegação; páginas de lista com filtros e paginação; formulários de cadastro/edição; painel com dados externos (bandeira, clima, mapa).
-
----
-
-## 🔧 Comandos úteis
-
-### Atualizar submódulos (front/back) para o último commit remoto
+- **Atualizar submódulos**:
 
 ```bash
 git submodule update --remote --merge
 git add frontend backend
-git commit -m "Atualiza submódulos para últimas versões"
+git commit -m "Atualiza submódulos"
 git push
 ```
 
-### Resetar completamente (containers, volumes, imagens de cache)
-
-⚠️ Cuidado: apaga volume do Postgres e dados!
+- **Reset completo** (apaga dados!):
 
 ```bash
 docker compose down --volumes --remove-orphans
@@ -139,7 +97,7 @@ docker compose build --no-cache
 docker compose up -d
 ```
 
-### Ver logs
+- **Ver logs**:
 
 ```bash
 docker compose logs -f backend
@@ -149,7 +107,27 @@ docker compose logs -f db
 
 ---
 
+## Fluxo funcional resumido
 
-## 📄 Licença
+- CRUD: Continentes ↔ Países ↔ Cidades  
+- Integrações externas: REST Countries, OpenWeatherMap  
+- Interface: React + TypeScript + Tailwind/shadcn  
+- Navegação: sidebar, listas com filtros/paginação, formulários de cadastro/edição, painel com mapa e bandeiras
 
-Projeto acadêmico/educacional. Ajuste a licença conforme sua necessidade.
+---
+
+## 🎥 Vídeo
+
+Vídeo mostrando **como rodar o projeto do zero** usando o README.md como referência:  
+
+
+https://github.com/user-attachments/assets/635fb137-a697-41ef-bcb0-1c61b6694d31
+
+
+
+---
+
+## Licença
+
+Projeto acadêmico/educacional. Ajuste conforme necessário.
+
